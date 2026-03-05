@@ -1,4 +1,4 @@
-package main
+package scraper
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/oneelabed/RSSAggregator/internal/database"
 )
 
-func startScraping(db *database.Queries, concurrency int, timeBetweenRequest time.Duration) {
+func StartScraping(db *database.Queries, concurrency int, timeBetweenRequest time.Duration) {
 	log.Printf("Scraping on %v goroutines every %s duration", concurrency, timeBetweenRequest)
 
 	ticker := time.NewTicker(timeBetweenRequest)
@@ -28,14 +28,14 @@ func startScraping(db *database.Queries, concurrency int, timeBetweenRequest tim
 		for _, feed := range feeds {
 			wg.Add(1)
 
-			go scrapeFeed(db, wg, feed)
+			go ScrapeFeed(db, wg, feed)
 		}
 
 		wg.Wait()
 	}
 }
 
-func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
+func ScrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 	defer wg.Done()
 
 	_, err := db.MarkFeedAsFetched(context.Background(), feed.ID)
@@ -44,7 +44,7 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 		return
 	}
 
-	rssFeed, err := urlToFeed(feed.Url)
+	rssFeed, err := UrlToFeed(feed.Url)
 	if err != nil {
 		log.Println("Error fetching feed:", err)
 		return

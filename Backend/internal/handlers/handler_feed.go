@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -7,10 +7,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	. "github.com/oneelabed/RSSAggregator/internal/config"
 	"github.com/oneelabed/RSSAggregator/internal/database"
 )
 
-func (apiCfg *apiConfig) handlerCreateFeed(w http.ResponseWriter, r *http.Request, user database.User) {
+func HandlerCreateFeed(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request, user database.User) {
 	type parameter struct {
 		Name string `json:"name"`
 		Url  string `json:"url"`
@@ -22,7 +23,7 @@ func (apiCfg *apiConfig) handlerCreateFeed(w http.ResponseWriter, r *http.Reques
 
 	err := decoder.Decode(&params)
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+		RespondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
 		return
 	}
 
@@ -35,19 +36,19 @@ func (apiCfg *apiConfig) handlerCreateFeed(w http.ResponseWriter, r *http.Reques
 		UserID:    user.ID,
 	})
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Couldn't create feed: %v", err))
+		RespondWithError(w, 400, fmt.Sprintf("Couldn't create feed: %v", err))
 		return
 	}
 
-	respondWithJSON(w, 201, DBFeedToFeed(feed))
+	RespondWithJSON(w, 201, DBFeedToFeed(feed))
 }
 
-func (apiCfg *apiConfig) handlerGetFeeds(w http.ResponseWriter, r *http.Request) {
+func HandlerGetFeeds(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	feeds, err := apiCfg.DB.GetFeeds(r.Context())
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Couldn't get feeds: %v", err))
+		RespondWithError(w, 400, fmt.Sprintf("Couldn't get feeds: %v", err))
 		return
 	}
 
-	respondWithJSON(w, 201, DBFeedsToFeeds(feeds))
+	RespondWithJSON(w, 201, DBFeedsToFeeds(feeds))
 }

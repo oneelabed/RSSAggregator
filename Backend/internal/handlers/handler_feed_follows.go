@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -8,10 +8,11 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
+	. "github.com/oneelabed/RSSAggregator/internal/config"
 	"github.com/oneelabed/RSSAggregator/internal/database"
 )
 
-func (apiCfg *apiConfig) handlerCreateFeedFollow(w http.ResponseWriter, r *http.Request, user database.User) {
+func HandlerCreateFeedFollow(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request, user database.User) {
 	type parameter struct {
 		FeedID uuid.UUID `json:"feed_id"`
 	}
@@ -22,7 +23,7 @@ func (apiCfg *apiConfig) handlerCreateFeedFollow(w http.ResponseWriter, r *http.
 
 	err := decoder.Decode(&params)
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+		RespondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
 		return
 	}
 
@@ -34,28 +35,28 @@ func (apiCfg *apiConfig) handlerCreateFeedFollow(w http.ResponseWriter, r *http.
 		FeedID:    params.FeedID,
 	})
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Couldn't create feed follow: %v", err))
+		RespondWithError(w, 400, fmt.Sprintf("Couldn't create feed follow: %v", err))
 		return
 	}
 
-	respondWithJSON(w, 201, DBFollowToFollow(feed_follow))
+	RespondWithJSON(w, 201, DBFollowToFollow(feed_follow))
 }
 
-func (apiCfg *apiConfig) handlerGetFeedFollows(w http.ResponseWriter, r *http.Request, user database.User) {
+func HandlerGetFeedFollows(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request, user database.User) {
 	follows, err := apiCfg.DB.GetFeedFollows(r.Context(), user.ID)
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Couldn't get feed follows: %v", err))
+		RespondWithError(w, 400, fmt.Sprintf("Couldn't get feed follows: %v", err))
 		return
 	}
 
-	respondWithJSON(w, 201, DBFollowsToFollows(follows))
+	RespondWithJSON(w, 201, DBFollowsToFollows(follows))
 }
 
-func (apiCfg *apiConfig) handlerDeleteFeedFollow(w http.ResponseWriter, r *http.Request, user database.User) {
+func HandlerDeleteFeedFollow(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request, user database.User) {
 	feed_follow_id_str := chi.URLParam(r, "feedFollowId")
 	feed_follow_id, err := uuid.Parse(feed_follow_id_str)
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Couldn't parse feed follow id: %v", err))
+		RespondWithError(w, 400, fmt.Sprintf("Couldn't parse feed follow id: %v", err))
 		return
 	}
 
@@ -64,9 +65,9 @@ func (apiCfg *apiConfig) handlerDeleteFeedFollow(w http.ResponseWriter, r *http.
 		UserID: user.ID,
 	})
 	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Couldn't delete feed follow: %v", err))
+		RespondWithError(w, 400, fmt.Sprintf("Couldn't delete feed follow: %v", err))
 		return
 	}
 
-	respondWithJSON(w, 200, "deleted follow successfully")
+	RespondWithJSON(w, 200, "deleted follow successfully")
 }
