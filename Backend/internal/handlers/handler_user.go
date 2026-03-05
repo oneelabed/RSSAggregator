@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -55,5 +56,29 @@ func HandlerGetPostsForUser(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Re
 	}
 
 	RespondWithJSON(w, 200, DBPostsToPosts(posts))
+}
 
+func HandlerSearchPosts(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request, user database.User) {
+	queryParam := r.URL.Query().Get("q")
+	param2 := sql.NullString{
+		String: queryParam,
+		Valid:  true,
+	}
+
+	if queryParam == "" {
+		RespondWithError(w, 400, "Search query 'q' is required")
+		return
+	}
+
+	posts, err := apiCfg.DB.SearchPostsForUser(r.Context(), database.SearchPostsForUserParams{
+		UserID:  user.ID,
+		Column2: param2,
+		Limit:   10,
+	})
+	if err != nil {
+		RespondWithError(w, 400, fmt.Sprintf("Search failed: %v", err))
+		return
+	}
+
+	RespondWithJSON(w, 200, DBPostsToPosts(posts))
 }

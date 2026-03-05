@@ -99,3 +99,50 @@ func (q *Queries) GetPostsForUser(ctx context.Context, arg GetPostsForUserParams
 	}
 	return items, nil
 }
+
+const searchPostsForUser = `-- name: SearchPostsForUser :many
+SELECT posts.id, posts.created_at, posts.updated_at, posts.title, posts.description, posts.published_at, posts.url, posts.feed_id FROM posts
+JOIN feed_follows ON posts.feed_id = feed_follows.feed_id
+WHERE feed_follows.user_id = $1 
+  AND (posts.title ILIKE '%' || $2 || '%' OR posts.description ILIKE '%' || $2 || '%')
+ORDER BY posts.published_at DESC
+LIMIT $3
+`
+
+type SearchPostsForUserParams struct {
+	UserID  uuid.UUID
+	Column2 sql.NullString
+	Limit   int32
+}
+
+func (q *Queries) SearchPostsForUser(ctx context.Context, arg SearchPostsForUserParams) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, searchPostsForUser, arg.UserID, arg.Column2, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Description,
+			&i.PublishedAt,
+			&i.Url,
+			&i.FeedID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
