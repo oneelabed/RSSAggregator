@@ -103,6 +103,21 @@ func IsRelevant(title, description string) bool {
 		"jerusalem",
 		"tel aviv",
 		"iran",
+		"Northern Border",
+		"Reserves",
+		"Miluim",
+		"Security Forces",
+		"ישראל",
+		"צהל",
+		"עזה",
+		"חמאס",
+		"חזבאללה",
+		"לבנון",
+		"ירושלים",
+		"תל אביב",
+		"איראן",
+		"כוחות הביטחון",
+		"מילואים",
 	}
 
 	text := strings.ToLower(title + " " + description)
