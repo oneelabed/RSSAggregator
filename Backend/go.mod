@@ -1,4 +1,4 @@
-module github.com/oneelabed/RSSAggregator
+module github.com/oneelabed/IsraelConflictMonitor
 
 go 1.25.0
 

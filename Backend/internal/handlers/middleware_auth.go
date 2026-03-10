@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/oneelabed/RSSAggregator/internal/auth"
-	. "github.com/oneelabed/RSSAggregator/internal/config"
-	"github.com/oneelabed/RSSAggregator/internal/database"
+	"github.com/oneelabed/IsraelConflictMonitor/internal/auth"
+	. "github.com/oneelabed/IsraelConflictMonitor/internal/config"
+	"github.com/oneelabed/IsraelConflictMonitor/internal/database"
 )
 
 type authedHandler func(*ApiConfig, http.ResponseWriter, *http.Request, database.User)

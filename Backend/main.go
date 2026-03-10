@@ -10,10 +10,10 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
-	"github.com/oneelabed/RSSAggregator/internal/config"
-	"github.com/oneelabed/RSSAggregator/internal/database"
-	. "github.com/oneelabed/RSSAggregator/internal/handlers"
-	. "github.com/oneelabed/RSSAggregator/internal/scraper"
+	"github.com/oneelabed/IsraelConflictMonitor/internal/config"
+	"github.com/oneelabed/IsraelConflictMonitor/internal/database"
+	. "github.com/oneelabed/IsraelConflictMonitor/internal/handlers"
+	. "github.com/oneelabed/IsraelConflictMonitor/internal/scraper"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/oneelabed/RSSAggregator/internal/database"
+	"github.com/oneelabed/IsraelConflictMonitor/internal/database"
 )
 
 func StartScraping(db *database.Queries, concurrency int, timeBetweenRequest time.Duration) {
