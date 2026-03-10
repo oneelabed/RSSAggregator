@@ -1,5 +1,7 @@
-# RSS Aggregator
-A high-performance, concurrent backend service built in Go that allows users to register, add RSS feeds, and automatically scrape posts into a searchable database. 
+# Israel Conflict Monitor (ICM)
+A high-performance, multi-lingual intelligence engine built in Go. ICM provides a 
+unified, real-time dashboard for verified news sources, specifically designed to 
+filter and aggregate critical updates during the ongoing conflict in Israel.
 
 ## 🚀 Features
 - **Concurrent Scraper**: A background worker pool that uses goroutines and WaitGroups to fetch multiple RSS feeds simultaneously without blocking the main API.
