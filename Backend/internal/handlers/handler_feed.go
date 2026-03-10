@@ -11,7 +11,7 @@ import (
 	"github.com/oneelabed/RSSAggregator/internal/database"
 )
 
-func HandlerCreateFeed(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request, user database.User) {
+func HandlerCreateFeed(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	type parameter struct {
 		Name string `json:"name"`
 		Url  string `json:"url"`
@@ -33,7 +33,6 @@ func HandlerCreateFeed(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
 		Url:       params.Url,
-		UserID:    user.ID,
 	})
 	if err != nil {
 		RespondWithError(w, 400, fmt.Sprintf("Couldn't create feed: %v", err))

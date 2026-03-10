@@ -60,7 +60,6 @@ func DBFeedToFeed(dbFeed database.Feed) Feed {
 		UpdatedAt: dbFeed.UpdatedAt,
 		Name:      dbFeed.Name,
 		Url:       dbFeed.Url,
-		UserID:    dbFeed.UserID,
 	}
 }
 
