@@ -18,6 +18,7 @@ type Feed struct {
 	Name          string
 	Url           string
 	LastFetchedAt sql.NullTime
+	IconUrl       string
 }
 
 type FeedFollow struct {

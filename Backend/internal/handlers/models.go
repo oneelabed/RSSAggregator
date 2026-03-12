@@ -21,6 +21,7 @@ type Feed struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	Name      string    `json:"name"`
 	Url       string    `json:"url"`
+	IconUrl   string    `json:"icon_url"`
 	UserID    uuid.UUID `json:"user_id"`
 }
 
@@ -41,6 +42,8 @@ type Post struct {
 	PublishedAt time.Time `json:"published_at"`
 	Url         string    `json:"url"`
 	FeedID      uuid.UUID `json:"feed_id"`
+	FeedName    string    `json:"feed_name"`
+	FeedIcon    string    `json:"feed_icon"`
 }
 
 func DBUserToUser(dbUser database.User) User {
@@ -60,6 +63,7 @@ func DBFeedToFeed(dbFeed database.Feed) Feed {
 		UpdatedAt: dbFeed.UpdatedAt,
 		Name:      dbFeed.Name,
 		Url:       dbFeed.Url,
+		IconUrl:   dbFeed.IconUrl,
 	}
 }
 
@@ -118,5 +122,64 @@ func DBPostsToPosts(dbPosts []database.Post) []Post {
 		posts = append(posts, DBPostToPost(post))
 	}
 
+	return posts
+}
+
+// New helper for the JOIN query results
+func DBPostRowToPost(dbPost database.GetPostsForUserRow) Post {
+	var desc *string
+	if dbPost.Description.Valid {
+		desc = &dbPost.Description.String
+	}
+
+	return Post{
+		ID:          dbPost.ID,
+		CreatedAt:   dbPost.CreatedAt,
+		UpdatedAt:   dbPost.UpdatedAt,
+		Title:       dbPost.Title,
+		Description: desc,
+		PublishedAt: dbPost.PublishedAt,
+		Url:         dbPost.Url,
+		FeedID:      dbPost.FeedID,
+		FeedName:    dbPost.FeedName,
+		FeedIcon:    dbPost.FeedIcon,
+	}
+}
+
+func DBPostRowsToPosts(dbPosts []database.GetPostsForUserRow) []Post {
+	posts := []Post{}
+	for _, post := range dbPosts {
+		posts = append(posts, DBPostRowToPost(post))
+	}
+	return posts
+}
+
+// Converter for the Search Query Rows
+func DBSearchRowToPost(dbPost database.SearchPostsForUserRow) Post {
+	var desc *string
+	if dbPost.Description.Valid {
+		desc = &dbPost.Description.String
+	}
+
+	return Post{
+		ID:          dbPost.ID,
+		CreatedAt:   dbPost.CreatedAt,
+		UpdatedAt:   dbPost.UpdatedAt,
+		Title:       dbPost.Title,
+		Description: desc,
+		PublishedAt: dbPost.PublishedAt,
+		Url:         dbPost.Url,
+		FeedID:      dbPost.FeedID,
+		FeedName:    dbPost.FeedName,
+		FeedIcon:    dbPost.FeedIcon,
+	}
+}
+
+// Slice converter for Search Results
+func DBSearchRowsToPosts(dbPosts []database.SearchPostsForUserRow) []Post {
+	posts := make([]Post, len(dbPosts))
+	for i, post := range dbPosts {
+		posts[i] = DBSearchRowToPost(post)
+	}
 	return posts
 }

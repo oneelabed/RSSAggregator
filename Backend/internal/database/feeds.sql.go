@@ -15,7 +15,7 @@ import (
 const createFeed = `-- name: CreateFeed :one
 INSERT INTO feeds (id, created_at, updated_at, name, url) 
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, created_at, updated_at, name, url, last_fetched_at
+RETURNING id, created_at, updated_at, name, url, last_fetched_at, icon_url
 `
 
 type CreateFeedParams struct {
@@ -42,12 +42,13 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 		&i.Name,
 		&i.Url,
 		&i.LastFetchedAt,
+		&i.IconUrl,
 	)
 	return i, err
 }
 
 const getFeeds = `-- name: GetFeeds :many
-SELECT id, created_at, updated_at, name, url, last_fetched_at FROM feeds
+SELECT id, created_at, updated_at, name, url, last_fetched_at, icon_url FROM feeds
 `
 
 func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
@@ -66,6 +67,7 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
 			&i.Name,
 			&i.Url,
 			&i.LastFetchedAt,
+			&i.IconUrl,
 		); err != nil {
 			return nil, err
 		}
@@ -81,7 +83,7 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
 }
 
 const getNextFeedsToFetch = `-- name: GetNextFeedsToFetch :many
-SELECT id, created_at, updated_at, name, url, last_fetched_at FROM feeds
+SELECT id, created_at, updated_at, name, url, last_fetched_at, icon_url FROM feeds
 ORDER BY last_fetched_at ASC NULLS FIRST
 LIMIT $1
 `
@@ -102,6 +104,7 @@ func (q *Queries) GetNextFeedsToFetch(ctx context.Context, limit int32) ([]Feed,
 			&i.Name,
 			&i.Url,
 			&i.LastFetchedAt,
+			&i.IconUrl,
 		); err != nil {
 			return nil, err
 		}
@@ -120,7 +123,7 @@ const markFeedAsFetched = `-- name: MarkFeedAsFetched :one
 UPDATE feeds
 SET last_fetched_at = NOW(), updated_at = NOW() 
 WHERE id = $1
-RETURNING id, created_at, updated_at, name, url, last_fetched_at
+RETURNING id, created_at, updated_at, name, url, last_fetched_at, icon_url
 `
 
 func (q *Queries) MarkFeedAsFetched(ctx context.Context, id uuid.UUID) (Feed, error) {
@@ -133,6 +136,7 @@ func (q *Queries) MarkFeedAsFetched(ctx context.Context, id uuid.UUID) (Feed, er
 		&i.Name,
 		&i.Url,
 		&i.LastFetchedAt,
+		&i.IconUrl,
 	)
 	return i, err
 }

@@ -56,21 +56,39 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 }
 
 const getPostsForUser = `-- name: GetPostsForUser :many
-SELECT posts.id, posts.created_at, posts.updated_at, posts.title, posts.description, posts.published_at, posts.url, posts.feed_id FROM posts
-JOIN feed_follows ON posts.feed_id = feed_follows.feed_id
+SELECT 
+    posts.id, posts.created_at, posts.updated_at, posts.title, posts.description, posts.published_at, posts.url, posts.feed_id, 
+    feeds.name as feed_name, 
+    feeds.icon_url as feed_icon
+FROM posts
+JOIN feeds ON posts.feed_id = feeds.id
+JOIN feed_follows ON feed_follows.feed_id = feeds.id
 WHERE feed_follows.user_id = $1
 ORDER BY posts.published_at DESC
 `
 
-func (q *Queries) GetPostsForUser(ctx context.Context, userID uuid.UUID) ([]Post, error) {
+type GetPostsForUserRow struct {
+	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Title       string
+	Description sql.NullString
+	PublishedAt time.Time
+	Url         string
+	FeedID      uuid.UUID
+	FeedName    string
+	FeedIcon    string
+}
+
+func (q *Queries) GetPostsForUser(ctx context.Context, userID uuid.UUID) ([]GetPostsForUserRow, error) {
 	rows, err := q.db.QueryContext(ctx, getPostsForUser, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Post
+	var items []GetPostsForUserRow
 	for rows.Next() {
-		var i Post
+		var i GetPostsForUserRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
@@ -80,6 +98,8 @@ func (q *Queries) GetPostsForUser(ctx context.Context, userID uuid.UUID) ([]Post
 			&i.PublishedAt,
 			&i.Url,
 			&i.FeedID,
+			&i.FeedName,
+			&i.FeedIcon,
 		); err != nil {
 			return nil, err
 		}
@@ -95,8 +115,13 @@ func (q *Queries) GetPostsForUser(ctx context.Context, userID uuid.UUID) ([]Post
 }
 
 const searchPostsForUser = `-- name: SearchPostsForUser :many
-SELECT posts.id, posts.created_at, posts.updated_at, posts.title, posts.description, posts.published_at, posts.url, posts.feed_id FROM posts
-JOIN feed_follows ON posts.feed_id = feed_follows.feed_id
+SELECT 
+    posts.id, posts.created_at, posts.updated_at, posts.title, posts.description, posts.published_at, posts.url, posts.feed_id, 
+    feeds.name AS feed_name, 
+    feeds.icon_url AS feed_icon
+FROM posts
+JOIN feeds ON posts.feed_id = feeds.id
+JOIN feed_follows ON feed_follows.feed_id = feeds.id
 WHERE feed_follows.user_id = $1 
   AND (posts.title ILIKE '%' || $2 || '%' OR posts.description ILIKE '%' || $2 || '%')
 ORDER BY posts.published_at DESC
@@ -107,15 +132,28 @@ type SearchPostsForUserParams struct {
 	Column2 sql.NullString
 }
 
-func (q *Queries) SearchPostsForUser(ctx context.Context, arg SearchPostsForUserParams) ([]Post, error) {
+type SearchPostsForUserRow struct {
+	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Title       string
+	Description sql.NullString
+	PublishedAt time.Time
+	Url         string
+	FeedID      uuid.UUID
+	FeedName    string
+	FeedIcon    string
+}
+
+func (q *Queries) SearchPostsForUser(ctx context.Context, arg SearchPostsForUserParams) ([]SearchPostsForUserRow, error) {
 	rows, err := q.db.QueryContext(ctx, searchPostsForUser, arg.UserID, arg.Column2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Post
+	var items []SearchPostsForUserRow
 	for rows.Next() {
-		var i Post
+		var i SearchPostsForUserRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
@@ -125,6 +163,8 @@ func (q *Queries) SearchPostsForUser(ctx context.Context, arg SearchPostsForUser
 			&i.PublishedAt,
 			&i.Url,
 			&i.FeedID,
+			&i.FeedName,
+			&i.FeedIcon,
 		); err != nil {
 			return nil, err
 		}

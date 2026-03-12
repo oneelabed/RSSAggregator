@@ -52,7 +52,7 @@ func HandlerGetPostsForUser(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	RespondWithJSON(w, 200, DBPostsToPosts(posts))
+	RespondWithJSON(w, 200, DBPostRowsToPosts(posts))
 }
 
 func HandlerSearchPosts(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request, user database.User) {
@@ -76,5 +76,5 @@ func HandlerSearchPosts(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	RespondWithJSON(w, 200, DBPostsToPosts(posts))
+	RespondWithJSON(w, 200, DBSearchRowsToPosts(posts))
 }
