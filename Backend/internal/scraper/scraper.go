@@ -105,46 +105,63 @@ func ScrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 }
 
 func IsRelevant(title, description string) bool {
-	var keywords = []string{
-		"israel",
-		"west bank",
-		"jerusalem",
-		"tel aviv",
-		"idf",
-		"Northern Border",
-		"Reserves",
-		"Miluim",
-		"Security Forces",
-		"palestine",
-		"gaza",
-		"hamas",
-		"hezbollah",
-		"lebanon",
-		"iran",
-		"ישראל",
-		`צה"ל`,
-		"צהל",
-		"עזה",
-		"ירושלים",
-		"תל אביב",
-		"חמאס",
-		"מילואים",
-		"כוחות הביטחון",
-		"פלסטין",
-		"חזבאללה",
-		"לבנון",
-		"איראן",
+	fullText := strings.ToLower(title + " " + description)
+
+	// 1. Geography/Participants (The "Who/Where")
+	regionKeys := []string{
+		"israel", "gaza", "lebanon", "hezbollah", "hamas", "idf", "iran", "jerusalem", "tel aviv", "yemen",
+		"palestine", "west bank", "ירושלים", "תל אביב", "לבנון", "איראן", "פלסטין", `איו"ש`, "גדה המערבית",
+		"חמאס", "חזבאללה", `צה"ל`, "צהל", "ישראל", "עזה", "איראן",
 	}
 
-	text := strings.ToLower(title + " " + description)
+	// 2. High Intensity (The "What")
+	intensityKeys := []string{
+		"rocket", "missile", "airstrike", "interception", "siren", "red alert", "iron dome", "uav", "drone",
+		"fire", "shelling", "atgm", "rpg", "explosion", "bombardment", "artillery", "casualty", "injured",
+		"wounded", "fatality", "critical", "hospitalized", "evacuation", "emergency", "paramedics", "mda",
+		"operation", "maneuver", "division", "brigade", "counter-terrorism", "special forces",
+		"reserves", "miluim", "security forces", "border", "tunnel", "ambush", "attack", "stabbing", "shooting",
+		"terrorist", "car-ramming", "hostages", "kidnapped", "negotiation", "ceasefire",
+		"רקטה", "אזעקה", "יירוט", "תקיפה", "צבע אדום", "טיל", "ירי", `פצמ"ר`, "כיפת ברזל", `כטב"ם`,
+		`נ"ט`, "פיצוץ", "נפגעים", "פצועים", "אנוש", "פינוי", "מבצע", "תמרון", "פיצוץ", "הפגזה", "ארטילריה",
+		"אוגדה", "חטיבה", "סיכול", "כוחות מיוחדים", "פיגוע", "הרוגים", "חירום", "מדא", `מד"א`, "בית חולים",
+		"דקירה", "מחבל", "דריסה", "מארב", "גבול", "מנהרה", "חילופי אש", "מילואים", "כוחות הביטחון", "הפסקת אש",
+		"חטיפה", "חטופים",
+	}
 
-	for _, k := range keywords {
-		if strings.Contains(text, k) {
-			return true
+	// 3. Non Related subjects
+	var negativeKeywords = []string{
+		"sports", "football", "soccer", "basketball", "eurovision", "stock market",
+		"weather", "entertainment", "lifestyle", "tourism", "restaurant", "recipe",
+		"ספורט", "כדורגל", "כדורסל", "אירוויזיון", "בורסה", "מזג אוויר", "תיירות",
+	}
+
+	hasNonRelated := false
+	for _, k := range negativeKeywords {
+		if strings.Contains(fullText, k) {
+			hasNonRelated = true
+			return false
 		}
 	}
 
-	return false
+	hasRegion := false
+	for _, k := range regionKeys {
+		if strings.Contains(fullText, k) {
+			hasRegion = true
+			break
+		}
+	}
+
+	hasIntensity := false
+	for _, k := range intensityKeys {
+		if strings.Contains(fullText, k) {
+			hasIntensity = true
+			break
+		}
+	}
+
+	// Only return true if ALL are present
+	return hasRegion && hasIntensity && !hasNonRelated
 }
 
 func flexibleDate(dateStr string) (time.Time, error) {
