@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -70,18 +71,19 @@ func ScrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 			log.Printf("Couldn't parse date for feed %v: %v", feed.Name, err)
 			continue
 		}
-		/*pubDate, err := time.Parse(time.RFC1123, item.PubDate)
-		if err != nil {
-			if strings.Contains(err.Error(), `parsing time ""`) {
-				pubDate = time.Now()
-			} else {
-				pubDate, err = time.Parse(time.RFC1123Z, item.PubDate)
-				if err != nil {
-					log.Printf("Couldn't parse date for feed %v: %v", feed.Name, err)
-					continue
-				}
-			}
-		}*/
+
+		switch feed.Name {
+		case "Jerusalem Post":
+			desc.String = GetBetween(item.Description, `alt='`, `' title`)
+		case "Middle East Eye":
+			desc.String = GetBetween(item.Description, `<p>`, `</p>`)
+		case "The Times Of Israel":
+			desc.String = GetBetween(item.Description, `<p>`, `</p>`)
+		case "Al Monitor":
+			desc.String = GetBetween(item.Description, `<p>`, `</p>`)
+		}
+
+		desc.String = stripTags(desc.String)
 
 		_, err = db.CreatePost(context.Background(), database.CreatePostParams{
 			ID:          uuid.New(),
@@ -165,11 +167,41 @@ func IsRelevant(title, description string) bool {
 }
 
 func flexibleDate(dateStr string) (time.Time, error) {
-	layouts := []string{time.RFC1123, time.RFC1123Z, time.RFC3339, "2006-01-02T15:04:05-0700", "Mon, 02 Jan 2006 15:04:05", ""}
+	layouts := []string{time.RFC1123, time.RFC1123Z, time.RFC3339, "2006-01-02T15:04:05-0700", "Mon, 02 Jan 2006 15:04:05"}
 	for _, layout := range layouts {
 		if t, err := time.Parse(layout, dateStr); err == nil {
 			return t, nil
 		}
 	}
 	return time.Time{}, fmt.Errorf("unknown date format: %s", dateStr)
+}
+
+// GetBetween returns the string found between 'start' and 'finish'.
+// If either boundary is not found, it returns an empty string.
+func GetBetween(input, start, finish string) string {
+	// Find the position of the start string
+	startIndex := strings.Index(input, start)
+	if startIndex == -1 {
+		return ""
+	}
+
+	// Move the index to the end of the start string
+	startIndex += len(start)
+
+	// Find the position of the finish string, starting from the new startIndex
+	endOffset := strings.Index(input[startIndex:], finish)
+	if endOffset == -1 {
+		return ""
+	}
+
+	// Calculate the actual end index
+	endIndex := startIndex + endOffset
+
+	return input[startIndex:endIndex]
+}
+
+func stripTags(input string) string {
+	// This regex finds anything between < and > and deletes it
+	re := regexp.MustCompile(`<[^>]*>`)
+	return re.ReplaceAllString(input, "")
 }
