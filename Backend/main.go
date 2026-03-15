@@ -60,6 +60,9 @@ func main() {
 	v1router.Post("/users", func(w http.ResponseWriter, r *http.Request) {
 		HandlerCreateUser(&apiCfg, w, r)
 	})
+	v1router.Post("/login", func(w http.ResponseWriter, r *http.Request) {
+		HandlerLogin(&apiCfg, w, r)
+	})
 	v1router.Get("/users", MiddlewareAuth(&apiCfg, HandlerGetUserByAPI))
 	v1router.Post("/feeds", func(w http.ResponseWriter, r *http.Request) {
 		HandlerCreateFeed(&apiCfg, w, r)
