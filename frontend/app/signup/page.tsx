@@ -6,16 +6,32 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createUser } from "@/lib/actions/createUser";
+import { useRouter } from "next/navigation";
 
 export default function SignUp() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Submit:", { username, password });
-    // TODO: connect to backend
+    
+    try {
+      const userData = await createUser(username, password);
+      
+      localStorage.setItem("api_key", userData.api_key);
+      localStorage.setItem("username", userData.name);
+
+      console.log("Logged in successfully:", userData);
+
+      router.push("/");
+      
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    }
   };
 
   return (
