@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Post } from "@/types/Post"
 import PostCard from "@/components/PostCard"
-import { Loader2, Newspaper, Search, X } from "lucide-react"
+import { Loader2, Newspaper, Search, X, RefreshCcw } from "lucide-react"
 import Link from "next/link"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -12,15 +12,37 @@ export default function UserFeedPage() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  // We use this to track if we are currently looking at search results
   const [isSearching, setIsSearching] = useState(false)
+  const [newPostsAvailable, setNewPostsAvailable] = useState(false)
+
+  const checkForUpdates = async () => {
+    if (posts.length === 0) return;
+
+    try {
+      const latestId = posts[0].id;
+      const res = await fetch(`${API_URL}/v1/posts/check-new?latest_id=${latestId}`, {
+         headers: { 'Authorization': `ApiKey ${localStorage.getItem("api_key")}` }
+      });
+      const { hasNew } = await res.json();
+      
+      if (hasNew) {
+        setNewPostsAvailable(true);
+      }
+    } catch (err) {
+      console.error("Pulse check failed", err);
+    }
+  };
+
+  useEffect(() => {
+    const pulse = setInterval(checkForUpdates, 60000);
+    return () => clearInterval(pulse);
+  }, [posts]);
 
   const fetchFeed = async (query = "") => {
     setLoading(true)
     try {
       const apiKey = localStorage.getItem("api_key")
       
-      // Determine which endpoint to hit
       const endpoint = query 
         ? `${API_URL}/v1/posts/search?q=${encodeURIComponent(query)}`
         : `${API_URL}/v1/posts`
@@ -40,11 +62,10 @@ export default function UserFeedPage() {
     }
   }
 
-  // Effect for Debounced Search
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchFeed(searchQuery)
-    }, 400) // Wait 400ms after user stops typing
+    }, 400)
 
     return () => clearTimeout(timer)
   }, [searchQuery])
@@ -84,6 +105,19 @@ export default function UserFeedPage() {
             )}
           </div>
         </div>
+        {/* 3. Floating "New Posts" Toast */}
+        {newPostsAvailable && (
+            <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 animate-bounce">
+            <button 
+                onClick={() => {
+                window.location.reload(); 
+                }}
+                className="bg-primary text-white px-6 py-2 rounded-full shadow-2xl flex items-center gap-2 font-bold border-2 border-white"
+            >
+                <RefreshCcw className="w-4 h-4" /> New Updates Available
+            </button>
+            </div>
+        )}
       </header>
 
       <main className="max-w-7xl mx-auto">
