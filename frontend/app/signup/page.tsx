@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react"; // Added AlertCircle icon
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,18 @@ export default function SignUp() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(""); // Reset error state on new attempt
+
+    // 1. Client-side Validation
+    if (username.length < 3) {
+      setError("Username must be at least 3 characters long.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
     
     try {
       const userData = await createUser(username, password);
@@ -25,23 +37,19 @@ export default function SignUp() {
       localStorage.setItem("api_key", userData.api_key);
       localStorage.setItem("username", userData.name);
 
-      console.log("Logged in successfully:", userData);
-
       window.dispatchEvent(new Event("storage-update"));
-
       router.push("/");
       
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      // 2. Handling Server Errors (e.g., "Username already exists")
+      setError(err.message || "Something went wrong during sign up.");
     }
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1 flex items-center justify-center px-4 py-16">
-        {/* Changed from max-w-md to max-w-lg (512px) */}
         <div className="w-full max-w-lg"> 
-          {/* Increased padding from p-8 to p-10 or p-12 */}
           <div className="bg-card rounded-3xl border border-border p-10 shadow-2xl">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-foreground tracking-tight">
@@ -51,8 +59,15 @@ export default function SignUp() {
                 Join the monitor to get personalized updates
               </p>
             </div>
+
+            {/* ERROR DISPLAY: Shows only if error exists */}
+            {error && (
+              <div className="mb-6 flex items-center gap-3 p-4 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-2xl animate-in fade-in zoom-in duration-200">
+                <AlertCircle className="h-5 w-5" />
+                <p>{error}</p>
+              </div>
+            )}
             
-            {/* Increased space-y-5 to space-y-6 for more breathing room */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-3">
                 <Label htmlFor="name" className="text-base">Username</Label>
@@ -62,7 +77,7 @@ export default function SignUp() {
                   placeholder="Onel"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="h-14 rounded-2xl text-lg px-4" // Taller input (h-14) and bigger text
+                  className={`h-14 rounded-2xl text-lg px-4 ${error.includes("Username") ? "border-destructive" : ""}`}
                   required
                 />
               </div>
@@ -73,10 +88,10 @@ export default function SignUp() {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create a password"
+                    placeholder="At least 8 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="h-14 rounded-2xl text-lg px-4 pr-12"
+                    className={`h-14 rounded-2xl text-lg px-4 pr-12 ${error.includes("Password") ? "border-destructive" : ""}`}
                     required
                   />
                   <button
@@ -89,7 +104,6 @@ export default function SignUp() {
                 </div>
               </div>
 
-              {/* Taller button with larger text */}
               <Button type="submit" className="w-full h-14 rounded-2xl text-lg font-bold shadow-md transition-all hover:scale-[1.01]">
                 Sign Up
               </Button>
