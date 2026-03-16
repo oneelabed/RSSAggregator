@@ -9,4 +9,5 @@ export interface Feed {
   url: string;
   icon_url: string;
   user_id: UUID;
+  is_following: boolean;
 }

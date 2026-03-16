@@ -27,6 +27,8 @@ export default function SignUp() {
 
       console.log("Logged in successfully:", userData);
 
+      window.dispatchEvent(new Event("storage-update"));
+
       router.push("/");
       
     } catch (err: any) {
