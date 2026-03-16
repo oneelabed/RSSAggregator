@@ -13,14 +13,13 @@ import (
 
 func HandlerCreateFeed(apiCfg *ApiConfig, w http.ResponseWriter, r *http.Request) {
 	type parameter struct {
-		Name string `json:"name"`
-		Url  string `json:"url"`
+		Name    string `json:"name"`
+		Url     string `json:"url"`
+		IconURL string `json:"icon_url"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
-
 	params := parameter{}
-
 	err := decoder.Decode(&params)
 	if err != nil {
 		RespondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
