@@ -48,3 +48,7 @@ SELECT EXISTS (
     WHERE feed_follows.user_id = $1 
     AND posts.created_at > (SELECT created_at FROM posts WHERE posts.id = $2)
 );
+
+-- name: DeleteOldPosts :exec
+DELETE FROM posts 
+WHERE published_at < NOW() - INTERVAL '30 days';

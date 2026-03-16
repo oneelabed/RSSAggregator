@@ -76,6 +76,16 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 	return i, err
 }
 
+const deleteOldPosts = `-- name: DeleteOldPosts :exec
+DELETE FROM posts 
+WHERE published_at < NOW() - INTERVAL '30 days'
+`
+
+func (q *Queries) DeleteOldPosts(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteOldPosts)
+	return err
+}
+
 const getDiversePosts = `-- name: GetDiversePosts :many
 WITH RankedPosts AS (
     SELECT 

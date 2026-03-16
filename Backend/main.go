@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -42,6 +43,7 @@ func main() {
 	}
 
 	go StartScraping(apiCfg.DB, 23, time.Minute)
+	startCleanupWorker(&apiCfg)
 
 	router := chi.NewRouter()
 
@@ -91,4 +93,25 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func startCleanupWorker(apiCfg *config.ApiConfig) {
+	// Create a ticker that triggers every 24 hours
+	ticker := time.NewTicker(24 * time.Hour)
+
+	// Run the first cleanup immediately on startup
+	go func() {
+		for {
+			log.Println("Starting daily database cleanup...")
+			err := apiCfg.DB.DeleteOldPosts(context.Background())
+			if err != nil {
+				log.Printf("Cleanup error: %v", err)
+			} else {
+				log.Println("Database cleanup successful.")
+			}
+
+			// Wait for the next tick (24 hours)
+			<-ticker.C
+		}
+	}()
 }
