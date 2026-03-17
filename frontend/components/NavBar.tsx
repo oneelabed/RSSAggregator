@@ -37,8 +37,8 @@ export default function Navbar() {
                 <Image 
                     src="/ICMLogo.png" 
                     alt="ICM Logo" 
-                    width={90} 
-                    height={90}
+                    width={50} 
+                    height={50}
                     className="object-contain" 
                 />
               </div>
