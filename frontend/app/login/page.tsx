@@ -60,7 +60,6 @@ export default function SignUp() {
                 <Input
                   id="name"
                   type="text"
-                  placeholder="Onel"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="h-14 rounded-2xl text-lg px-4" // Taller input (h-14) and bigger text
@@ -74,7 +73,6 @@ export default function SignUp() {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create a password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-14 rounded-2xl text-lg px-4 pr-12"
