@@ -11,12 +11,22 @@ filter and aggregate critical updates during the ongoing conflict in Israel.
 - **Automated Scheduling**: Intelligent fetching logic that prioritizes feeds based on their last fetched timestamp.
 - **Full-Text Search**: Integrated PostgreSQL's full-text search engine to allow users to filter and find specific posts by title or description across all followed feeds.
 
-## 🛠️ Tech Stack
-- **Language**: Go (Golang)
+- ## 🛠️ Tech Stack
+- **Backend**: Go (Golang) with Chi Router
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **UI Components**: Shadcn UI & Lucide Icons
 - **Database**: PostgreSQL
-- **Router**: Chi Router (with sub-routing and middleware)
 - **SQL Toolkit**: SQLC (Type-safe query generation)
 - **Migrations**: Goose
 
 ## 🔒 Authentication
 Unique API Keys are generated upon user registration and required in the Authorization header to verify identity for all protected routes.
+
+## 🌐 Deployment
+Frontend → Vercel \
+Backend → Render \
+Database → PostgreSQL (Neon) \
+Configured with a custom domain + SSL.
+
+## Link
+[Israel Conflict Monitor](https://israelconflictmonitor.org)
