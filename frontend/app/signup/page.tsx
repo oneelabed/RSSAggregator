@@ -32,7 +32,7 @@ export default function SignUp() {
     }
     
     try {
-      const userData = await createUser(username, password);
+      const userData = await createUser(username.toLowerCase(), password);
       
       localStorage.setItem("api_key", userData.api_key);
       localStorage.setItem("username", userData.name);

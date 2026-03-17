@@ -20,7 +20,7 @@ export default function SignUp() {
     e.preventDefault();
 
     try {
-      const userData = await login(username, password);
+      const userData = await login(username.toLowerCase(), password);
       
       localStorage.setItem("api_key", userData.api_key);
       localStorage.setItem("username", userData.name);
