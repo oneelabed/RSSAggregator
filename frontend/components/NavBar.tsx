@@ -57,7 +57,7 @@ export default function Navbar() {
           <div className="flex items-center gap-6">
             {auth.apiKey ? ( 
               <>
-                {localStorage.getItem("role") === "ADMIN" && (
+                {auth.role === "ADMIN" && (
                   <Link 
                     href="/admin" 
                     className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"

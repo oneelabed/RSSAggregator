@@ -6,22 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
 import { Feed } from "@/types/Feed"
-import { useRouter } from "next/navigation";
+import Cookies from "js-cookie"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DiscoverFeeds() {
   const [feeds, setFeeds] = useState<Feed[]>([])
   const [loading, setLoading] = useState(true)
-  const router = useRouter();
-
-  useEffect(() => {
-    const apiKey = localStorage.getItem("api_key");
-    
-    if (!apiKey) {
-      router.push("/login");
-    }
-  }, [router]);
 
   useEffect(() => {
     // 1. Fetch all feeds from your Go Backend
@@ -29,7 +20,7 @@ export default function DiscoverFeeds() {
     const fetchFeeds = async () => {
       try {
         const res = await fetch(`${API_URL}/v1/feeds`, {
-            headers: { 'Authorization': `ApiKey ${localStorage.getItem("api_key")}` }
+            headers: { 'Authorization': `ApiKey ${Cookies.get("api_key")}` }
         })
         const data = await res.json()
         setFeeds(data)
@@ -45,7 +36,7 @@ export default function DiscoverFeeds() {
   const toggleFollow = async (feedId: string, currentlyFollowing: boolean) => {
     const method = currentlyFollowing ? 'DELETE' : 'POST'
     const endpoint = `/v1/feed_follows`
-    const apiKey = localStorage.getItem("api_key")
+    const apiKey = Cookies.get("api_key")
 
     try {
       // Optimistic Update: Change UI immediately

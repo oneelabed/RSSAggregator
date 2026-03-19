@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Plus, Globe, Link as LinkIcon, Image as ImageIcon, Loader2, Users, ShieldCheck, Calendar, Key } from "lucide-react"
-import { useRouter } from "next/navigation";
+import Cookies from "js-cookie"; // 1. ADD THIS IMPORT
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -12,23 +12,12 @@ export default function AdminPage() {
   const [formData, setFormData] = useState({ name: "", url: "", icon_url: "" })
   const [users, setUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(true)
-  const router = useRouter();
-  
-  useEffect(() => {
-    const apiKey = localStorage.getItem("api_key");
-    const role = localStorage.getItem("role");
-
-    if (!apiKey || role !== "admin") {
-      // If not an admin, send them to the home page or a "Forbidden" page
-      router.push("/");
-    }
-  }, [router]);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const res = await fetch(`${API_URL}/v1/admin/users`, {
-          headers: { 'Authorization': `ApiKey ${localStorage.getItem("api_key")}` }
+          headers: { 'Authorization': `ApiKey ${Cookies.get("api_key")}` }
         })
         const data = await res.json()
         setUsers(data)
@@ -50,7 +39,7 @@ export default function AdminPage() {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `ApiKey ${localStorage.getItem("api_key")}` 
+          'Authorization': `ApiKey ${Cookies.get("api_key")}` 
         },
         body: JSON.stringify(formData)
       })

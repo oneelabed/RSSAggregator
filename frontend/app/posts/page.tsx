@@ -5,7 +5,7 @@ import { Post } from "@/types/Post"
 import PostCard from "@/components/PostCard"
 import { Loader2, Newspaper, Search, X, RefreshCcw } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import Cookies from "js-cookie"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -15,15 +15,6 @@ export default function UserFeedPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [newPostsAvailable, setNewPostsAvailable] = useState(false)
-  const router = useRouter();
-  
-  useEffect(() => {
-    const apiKey = localStorage.getItem("api_key");
-    
-    if (!apiKey) {
-      router.push("/login");
-    }
-  }, [router]);
 
   const checkForUpdates = async () => {
     if (posts.length === 0) return;
@@ -31,7 +22,7 @@ export default function UserFeedPage() {
     try {
       const latestId = posts[0].id;
       const res = await fetch(`${API_URL}/v1/posts/check-new?latest_id=${latestId}`, {
-         headers: { 'Authorization': `ApiKey ${localStorage.getItem("api_key")}` }
+         headers: { 'Authorization': `ApiKey ${Cookies.get("api_key")}` }
       });
       const { hasNew } = await res.json();
       
@@ -51,7 +42,7 @@ export default function UserFeedPage() {
   const fetchFeed = async (query = "") => {
     setLoading(true)
     try {
-      const apiKey = localStorage.getItem("api_key")
+      const apiKey = Cookies.get("api_key")
       
       const endpoint = query 
         ? `${API_URL}/v1/posts/search?q=${encodeURIComponent(query)}`
