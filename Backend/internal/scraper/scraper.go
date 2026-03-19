@@ -73,7 +73,17 @@ func ScrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 			continue
 		}
 
-		pubDate = pubDate.UTC()
+		if feed.Name == "Walla! News" || feed.Name == "Jerusalem Post" || strings.Contains(feed.Url, "walla.co.il") {
+			loc, _ := time.LoadLocation("Asia/Jerusalem")
+
+			t, parseErr := time.ParseInLocation("Mon, 02 Jan 2006 15:04:05", item.PubDate[:25], loc)
+
+			if parseErr == nil {
+				pubDate = t.UTC()
+			}
+		} else {
+			pubDate = pubDate.UTC()
+		}
 
 		switch feed.Name {
 		case "Jerusalem Post":
