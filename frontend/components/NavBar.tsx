@@ -3,13 +3,18 @@
 import { useState, useEffect } from "react";
 import Link from "next/link"
 import Image from "next/image"
+import Cookies from "js-cookie";
 
 export default function Navbar() {
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [auth, setAuth] = useState<{ apiKey: string | null; role: string | null }>({
+    apiKey: null,
+    role: null,
+  });
 
   const checkAuth = () => {
-    const key = localStorage.getItem("api_key");
-    setApiKey(key);
+    const key = Cookies.get("api_key") || null;
+    const role = Cookies.get("role") || null;
+    setAuth({ apiKey: key, role: role });
   };
 
   useEffect(() => {
@@ -50,7 +55,7 @@ export default function Navbar() {
 
           {/* Right Side: Auth Links */}
           <div className="flex items-center gap-6">
-            {apiKey ? ( 
+            {auth.apiKey ? ( 
               <>
                 {localStorage.getItem("role") === "ADMIN" && (
                   <Link 
@@ -68,9 +73,10 @@ export default function Navbar() {
                 >Discover Feeds</Link>
                 <button 
                   onClick={() => {
-                    localStorage.removeItem("api_key");
-                    localStorage.removeItem("username");
-                    localStorage.removeItem("role");
+                    Cookies.remove("api_key");
+                    Cookies.remove("username");
+                    Cookies.remove("role");
+                    window.dispatchEvent(new Event("storage-update"));
                     window.location.href = "/"; // Forces a hard refresh to clear the state
                   }}
                   className="text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
