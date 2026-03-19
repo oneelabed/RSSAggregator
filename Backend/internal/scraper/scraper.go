@@ -73,6 +73,8 @@ func ScrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 			continue
 		}
 
+		pubDate = pubDate.UTC()
+
 		switch feed.Name {
 		case "Jerusalem Post":
 			desc.String = GetBetween(item.Description, `alt='`, `' title`)

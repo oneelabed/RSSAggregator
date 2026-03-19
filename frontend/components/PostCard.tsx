@@ -80,8 +80,15 @@ function getTimeAgo(dateString: string): string {
   try {
     const now = new Date();
     const date = new Date(dateString);
-    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const diffInMs = now.getTime() - date.getTime();
+    const seconds = Math.floor(diffInMs / 1000);
+
     if (isNaN(seconds)) return "Recently";
+    
+    if (seconds < 0) {
+        console.log("Timezone mismatch detected for:", dateString);
+        return "just now"; 
+    }
     if (seconds < 60) return "just now";
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) return `${minutes}m ago`;
