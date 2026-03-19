@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/google/uuid"
 	"github.com/oneelabed/IsraelConflictMonitor/internal/database"
@@ -73,11 +74,18 @@ func ScrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 			continue
 		}
 
-		if feed.Name == "Walla! News" || feed.Name == "Jerusalem Post" || strings.Contains(feed.Url, "walla.co.il") {
-			loc, _ := time.LoadLocation("Asia/Jerusalem")
+		if feed.Name == "Walla! News" || feed.Name == "Jerusalem Post" {
+			loc, err := time.LoadLocation("Asia/Jerusalem")
+			if err != nil {
+				loc = time.FixedZone("IST", 2*60*60)
+			}
 
-			t, parseErr := time.ParseInLocation("Mon, 02 Jan 2006 15:04:05", item.PubDate[:25], loc)
+			dateToParse := item.PubDate
+			if len(dateToParse) > 25 {
+				dateToParse = dateToParse[:25]
+			}
 
+			t, parseErr := time.ParseInLocation("Mon, 02 Jan 2006 15:04:05", dateToParse, loc)
 			if parseErr == nil {
 				pubDate = t.UTC()
 			}
